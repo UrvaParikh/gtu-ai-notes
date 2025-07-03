@@ -14,11 +14,18 @@ st.markdown("""
 import openai
 openai.api_key = "your_openai_key"
 
-response = openai.ChatCompletion.create(
+client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
+response = client.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Explain deadlock in OS."}
+        {"role": "system", "content": "You are a professor who explains GTU topics in short simple notes."},
+        {"role": "user", "content": f"Explain the topic '{final_topic}' in short notes format for GTU B.Tech CSE students."}
+    ]
+)
+
+generated_notes = response.choices[0].message.content
+
     ]
 )
 
