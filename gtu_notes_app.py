@@ -1,61 +1,21 @@
 import streamlit as st
 import openai
 from fpdf import FPDF
-import os
 
-st.set_page_config(page_title="GTU AI Notes", layout="wide", page_icon="📘")
-st.markdown("""
-    <h1 style='text-align: center; color: #4CAF50;'>📘 GTU AI Notes Generator</h1>
-    <h4 style='text-align: center; color: gray;'>Powered by OpenAI • For GTU B.Tech CSE Students</h4>
-    <hr>
-""", unsafe_allow_html=True)
+st.set_page_config(page_title="GTU AI Notes Generator", layout="centered")
 
-# Your OpenAI API key
-import openai
-openai.api_key = "your_openai_key"
+st.title("📘 GTU AI Notes Generator")
 
-client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+subject = st.text_input("Enter subject name:")
+topic = st.text_input("Enter topic name:")
 
-response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a professor who explains GTU topics in short simple notes."},
-        {"role": "user", "content": f"Explain the topic '{final_topic}' in short notes format for GTU B.Tech CSE students."}
-    ]
-)
-
-generated_notes = response.choices[0].message.content
-
-    ]
-)
-
-st.markdown("### 🎯 Choose a topic or enter your own:")
-
-
-topics = [
-    "Deadlock in Operating System",
-    "Paging vs Segmentation",
-    "Normalization in DBMS",
-    "TCP vs UDP",
-    "Greedy Algorithm",
-    "DFS vs BFS",
-    "Bayes Theorem",
-    "Regression in ML",
-    "CPU Scheduling Algorithms",
-    "Multithreading",
-    "MapReduce in Big Data",
-    "Naive Bayes Classifier",
-    "K-means Clustering"
-]
-
-topic = st.selectbox("Choose a GTU topic:", options=topics)
-custom_topic = st.text_input("Or type your own topic:")
-final_topic = custom_topic if custom_topic else topic
-generated_notes = ""
+final_topic = f"{subject} - {topic}" if subject and topic else topic
 
 if st.button("Generate Notes"):
     if final_topic:
         with st.spinner("Generating..."):
+            client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
@@ -63,6 +23,7 @@ if st.button("Generate Notes"):
                     {"role": "user", "content": f"Explain the topic '{final_topic}' in short notes format for GTU B.Tech CSE students."}
                 ]
             )
+
             generated_notes = response.choices[0].message.content
             st.success("✅ Notes Generated!")
 
