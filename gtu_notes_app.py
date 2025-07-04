@@ -6,7 +6,7 @@ st.set_page_config(page_title="GTU AI Notes Generator", layout="centered")
 
 st.title("📘 GTU AI Notes Generator")
 
-st.image("https://i.imgur.com/6Fz1FjW.png", width=150)  # or upload your own logo
+st.image("https://images.app.goo.gl/NcGSF", width=150)  # or upload your own logo
 st.markdown("### Built by **Urva Parikh** · B.Tech CSE · AI/ML")
 st.markdown("---")
 
