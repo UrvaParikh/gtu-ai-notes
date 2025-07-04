@@ -25,18 +25,33 @@ if st.button("Generate Notes"):
             )
 
             generated_notes = response.choices[0].message.content
-            st.success("✅ Notes Generated!")
+            from fpdf import FPDF
+from io import BytesIO
 
-            st.markdown("### 📄 Generated Notes:")
-            st.markdown(
-                f"<div style='background-color: #f9f9f9; padding: 15px; border-radius: 10px;'>{generated_notes}</div>",
-                unsafe_allow_html=True
-            )
+st.success("✅ Notes Generated!")
 
-            st.download_button(
-                "📥 Download as PDF",
-                data=generated_notes,
-                file_name=f"{final_topic}_notes.pdf"
-            )
-    else:
-        st.warning("Please enter or select a topic.")
+st.markdown("### 📄 Generated Notes:")
+st.markdown(
+    f"<div style='background-color: #f9f9f9; padding: 15px; border-radius: 10px;'>{generated_notes}</div>",
+    unsafe_allow_html=True
+)
+
+# ✅ PDF Generation Code
+pdf = FPDF()
+pdf.add_page()
+pdf.set_auto_page_break(auto=True, margin=15)
+pdf.set_font("Arial", size=12)
+
+for line in generated_notes.split('\n'):
+    pdf.multi_cell(0, 10, line)
+
+pdf_output = BytesIO()
+pdf.output(pdf_output)
+pdf_output.seek(0)
+
+st.download_button(
+    label="📥 Download Notes as PDF",
+    data=pdf_output,
+    file_name=f"{final_topic}_GTU_notes.pdf",
+    mime='application/pdf'
+)
