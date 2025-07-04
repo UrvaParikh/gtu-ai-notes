@@ -56,10 +56,13 @@ from io import BytesIO
 st.success("✅ Notes Generated!")
 
 st.markdown("### 📄 Generated Notes:")
-st.markdown(
-    f"<div style='background-color: #f9f9f9; padding: 15px; border-radius: 10px;'>{generated_notes}</div>",
-    unsafe_allow_html=True
-)
+if generated_notes:
+    st.markdown(
+        f"<div style='background-color: #f9f9f9; padding: 15px; border-radius: 10px;'>{generated_notes}</div>",
+        unsafe_allow_html=True
+    )
+else:
+    st.warning("No notes were generated. Please try again.")
 
 # ✅ PDF Generation Code
 pdf = FPDF()
