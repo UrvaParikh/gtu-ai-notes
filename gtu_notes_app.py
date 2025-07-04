@@ -76,3 +76,28 @@ st.download_button(
     file_name=f"{final_topic}_GTU_notes.pdf",
     mime='application/pdf'
 )
+import pandas as pd
+import datetime
+
+st.markdown("---")
+st.subheader("📋 Feedback / Rating")
+
+rating = st.slider("How helpful were these notes?", 1, 5, 3)
+comment = st.text_input("Any suggestions or feedback? (Optional)")
+
+if st.button("Submit Feedback"):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    feedback_data = {
+        "Timestamp": timestamp,
+        "Subject": subject,
+        "Topic": topic,
+        "Rating": rating,
+        "Comment": comment
+    }
+
+    df = pd.DataFrame([feedback_data])
+    with open("feedback.csv", "a") as f:
+        df.to_csv(f, header=f.tell()==0, index=False)
+
+    st.success("✅ Thanks for your feedback!")
