@@ -80,6 +80,28 @@ st.download_button(
     file_name=f"{final_topic}_GTU_notes.pdf",
     mime='application/pdf'
 )
+
+import yagmail
+
+st.markdown("### 📧 Send Notes to Your Email")
+user_email = st.text_input("Enter your email to receive notes as PDF:")
+
+if st.button("📤 Send to Email"):
+    if user_email:
+        sender = st.secrets["EMAIL_SENDER"]
+        password = st.secrets["EMAIL_PASSWORD"]
+        
+        yag = yagmail.SMTP(user=sender, password=password)
+        yag.send(
+            to=user_email,
+            subject=f"{final_topic} - GTU AI Notes",
+            contents="Attached are your GTU AI-generated notes.",
+            attachments=pdf_output
+        )
+        st.success(f"✅ Notes sent to {user_email} successfully!")
+    else:
+        st.warning("Please enter a valid email address.")
+        
 import pandas as pd
 import datetime
 
