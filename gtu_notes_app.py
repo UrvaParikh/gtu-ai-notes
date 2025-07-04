@@ -6,8 +6,29 @@ st.set_page_config(page_title="GTU AI Notes Generator", layout="centered")
 
 st.title("📘 GTU AI Notes Generator")
 
-subject = st.text_input("Enter subject name:")
-topic = st.text_input("Enter topic name:")
+# Subject Dropdown
+subject = st.selectbox("📚 Select Subject", [
+    "Operating System",
+    "Computer Networks",
+    "Database Management System",
+    "Design and Analysis of Algorithms",
+    "Python for Data Science",
+    "Artificial Intelligence",
+    "Machine Learning"
+])
+
+# Topic Dropdown (linked with subject manually for now)
+topics = {
+    "Operating System": ["Deadlock", "Process Scheduling", "Memory Management", "Semaphore"],
+    "Computer Networks": ["OSI Model", "TCP/IP", "IP Addressing", "Routing Algorithms"],
+    "Database Management System": ["Normalization", "SQL", "ER Diagrams", "Transactions"],
+    "Design and Analysis of Algorithms": ["Greedy Algorithm", "Divide and Conquer", "Dynamic Programming", "Backtracking"],
+    "Python for Data Science": ["NumPy", "Pandas", "Matplotlib", "Data Preprocessing"],
+    "Artificial Intelligence": ["Search Algorithms", "Knowledge Representation", "Planning", "Expert Systems"],
+    "Machine Learning": ["Supervised vs Unsupervised", "Regression", "Classification", "Overfitting"]
+}
+
+topic = st.selectbox("📝 Select Topic", topics[subject])
 
 final_topic = f"{subject} - {topic}" if subject and topic else topic
 
