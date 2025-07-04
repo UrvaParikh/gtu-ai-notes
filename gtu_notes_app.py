@@ -41,7 +41,7 @@ if st.button("Generate Notes"):
 
                 # API Call using modern syntax
                 response = client.chat.completions.create(
-                    model="gpt-4",
+                    model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": "You are a helpful assistant that writes study notes for GTU students."},
                         {"role": "user", "content": prompt}
