@@ -1,132 +1,65 @@
 import streamlit as st
 import openai
+import html
 from fpdf import FPDF
 
+# Set page config
 st.set_page_config(page_title="GTU AI Notes Generator", layout="centered")
 
-st.title("📘 GTU AI Notes Generator")
+# App Header
+st.markdown("""
+    <h2 style='text-align: center; color: #336699;'>📘 GTU AI Notes Generator</h2>
+""", unsafe_allow_html=True)
 
-st.image("https://images.app.goo.gl/oxrgn", width=150)  # or upload your own logo
-st.markdown("### Built by **Urva Parikh** · B.Tech CSE · AI/ML")
-st.markdown("---")
+# OpenAI API Key (You should replace this with environment variable in real use)
+openai.api_key = "YOUR_OPENAI_API_KEY"
 
-# Subject Dropdown
-subject = st.selectbox("📚 Select Subject", [
-    "Operating System",
-    "Computer Networks",
-    "Database Management System",
-    "Design and Analysis of Algorithms",
-    "Python for Data Science",
-    "Artificial Intelligence",
-    "Machine Learning"
-])
+# Subject and Topic Inputs
+subject = st.selectbox("📚 Select Subject:", ["Operating System", "COA", "Digital Fundamentals", "Probability & Stats", "DM", "PEM"])
+topic = st.text_input("📝 Enter Topic (e.g., Paging, FSM, Boolean Algebra)")
 
-# Topic Dropdown (linked with subject manually for now)
-topics = {
-    "Operating System": ["Deadlock", "Process Scheduling", "Memory Management", "Semaphore"],
-    "Computer Networks": ["OSI Model", "TCP/IP", "IP Addressing", "Routing Algorithms"],
-    "Database Management System": ["Normalization", "SQL", "ER Diagrams", "Transactions"],
-    "Design and Analysis of Algorithms": ["Greedy Algorithm", "Divide and Conquer", "Dynamic Programming", "Backtracking"],
-    "Python for Data Science": ["NumPy", "Pandas", "Matplotlib", "Data Preprocessing"],
-    "Artificial Intelligence": ["Search Algorithms", "Knowledge Representation", "Planning", "Expert Systems"],
-    "Machine Learning": ["Supervised vs Unsupervised", "Regression", "Classification", "Overfitting"]
-}
-
-topic = st.selectbox("📝 Select Topic", topics[subject])
-
-final_topic = f"{subject} - {topic}" if subject and topic else topic
-
+# Generate Notes Button
 if st.button("Generate Notes"):
-    if final_topic:
-        with st.spinner("Generating..."):
-            client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are a professor who explains GTU topics in short simple notes."},
-                    {"role": "user", "content": f"Explain the topic '{final_topic}' in short notes format for GTU B.Tech CSE students."}
-                ]
-            )
-
-            generated_notes = response.choices[0].message.content
-            from fpdf import FPDF
-from io import BytesIO
-
-st.success("✅ Notes Generated!")
-
-st.markdown("### 📄 Generated Notes:")
-if generated_notes:
-    st.markdown(
-        f"<div style='background-color: #f9f9f9; padding: 15px; border-radius: 10px;'>{generated_notes}</div>",
-        unsafe_allow_html=True
-    )
-else:
-    st.warning("No notes were generated. Please try again.")
-
-# ✅ PDF Generation Code
-pdf = FPDF()
-pdf.add_page()
-pdf.set_auto_page_break(auto=True, margin=15)
-pdf.set_font("Arial", size=12)
-
-for line in generated_notes.split('\n'):
-    pdf.multi_cell(0, 10, line)
-
-pdf_output = BytesIO()
-pdf.output(pdf_output)
-pdf_output.seek(0)
-
-st.download_button(
-    label="📥 Download Notes as PDF",
-    data=pdf_output,
-    file_name=f"{final_topic}_GTU_notes.pdf",
-    mime='application/pdf'
-)
-
-import yagmail
-
-st.markdown("### 📧 Send Notes to Your Email")
-user_email = st.text_input("Enter your email to receive notes as PDF:")
-
-if st.button("📤 Send to Email"):
-    if user_email:
-        sender = st.secrets["EMAIL_SENDER"]
-        password = st.secrets["EMAIL_PASSWORD"]
-        
-        yag = yagmail.SMTP(user=sender, password=password)
-        yag.send(
-            to=user_email,
-            subject=f"{final_topic} - GTU AI Notes",
-            contents="Attached are your GTU AI-generated notes.",
-            attachments=pdf_output
-        )
-        st.success(f"✅ Notes sent to {user_email} successfully!")
+    if not topic:
+        st.error("Please enter a topic to generate notes.")
     else:
-        st.warning("Please enter a valid email address.")
-        
-import pandas as pd
-import datetime
+        with st.spinner("Generating notes..."):
+            try:
+                # OpenAI call
+                prompt = f"Generate GTU-level notes for the subject {subject} on the topic: {topic}. Include examples and definitions."
+                response = openai.ChatCompletion.create(
+                    model="gpt-4",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant that writes academic notes."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+                generated_notes = response['choices'][0]['message']['content']
+                safe_notes = html.escape(generated_notes)
 
+                # Display nicely
+                st.markdown(
+                    f"<div style='background-color: #f9f9f9; padding: 15px; border-radius: 10px; white-space: pre-wrap;'>{safe_notes}</div>",
+                    unsafe_allow_html=True
+                )
+
+                # PDF Download Option
+                if st.button("📄 Download as PDF"):
+                    pdf = FPDF()
+                    pdf.add_page()
+                    pdf.set_auto_page_break(auto=True, margin=15)
+                    pdf.set_font("Arial", size=12)
+                    for line in generated_notes.split('\n'):
+                        pdf.multi_cell(0, 10, line)
+                    pdf_path = f"{subject}_{topic}_notes.pdf"
+                    pdf.output(pdf_path)
+
+                    with open(pdf_path, "rb") as f:
+                        st.download_button("⬇️ Click here to download PDF", f, file_name=pdf_path)
+
+            except Exception as e:
+                st.error(f"❌ Error generating notes: {e}")
+
+# Footer
 st.markdown("---")
-st.subheader("📋 Feedback / Rating")
-
-rating = st.slider("How helpful were these notes?", 1, 5, 3)
-comment = st.text_input("Any suggestions or feedback? (Optional)")
-
-if st.button("Submit Feedback"):
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    feedback_data = {
-        "Timestamp": timestamp,
-        "Subject": subject,
-        "Topic": topic,
-        "Rating": rating,
-        "Comment": comment
-    }
-
-    df = pd.DataFrame([feedback_data])
-    with open("feedback.csv", "a") as f:
-        df.to_csv(f, header=f.tell()==0, index=False)
-
-    st.success("✅ Thanks for your feedback!")
+st.markdown("👨‍💻 Developed by Urva Parikh | AI Notes for GTU Students", unsafe_allow_html=True)
