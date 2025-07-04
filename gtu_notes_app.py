@@ -7,10 +7,10 @@ import os
 # Page Config
 st.set_page_config(page_title="GTU AI Notes Generator", layout="centered")
 
-# OpenAI Client Initialization (replace with your key)
-OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"
-client = OpenAI(api_key=OPENAI_API_KEY)
+import streamlit as st
+from openai import OpenAI
 
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 # Header
 st.markdown("""
     <h2 style='text-align: center; color: #336699;'>📘 GTU AI Notes Generator</h2>
